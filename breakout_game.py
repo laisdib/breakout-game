@@ -7,7 +7,8 @@ COLOR_BLACK = (0, 0, 0)
 COLOR_WHITE = (255, 255, 255)
 
 WIDTH = 893
-HEIGHT = 800
+HEIGHT = 955
+
 size = (WIDTH, HEIGHT)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Breakout")
@@ -26,303 +27,336 @@ YELLOW = (197, 199, 37)
 
 game_score = 0
 game_balls = 1
-velocity = 5
-ang = [2, 3, 4, 5, 6]
-
-paddle_width = 50
-paddle_height = 20
-
-all_sprites_list = pygame.sprite.Group()
-
-brick_sound = pygame.mixer.Sound('sounds_brick.wav')
-paddle_sound = pygame.mixer.Sound('sounds_paddle.wav')
-wall_sound = pygame.mixer.Sound('sounds_wall.wav')
+level = 1
 
 
-class Brick(pygame.sprite.Sprite):
+def main_game(score_game, balls_game, level_game):
 
-    def __init__(self, color, width, height):
-        super().__init__()
-        self.image = pygame.Surface([width, height])
-        pygame.draw.rect(self.image, color, [0, 0, width, height])
-        self.rect = self.image.get_rect()
+    velocity = 5
+    ang = [2, 3, 4, 5, 6]
 
+    paddle_width = 150
+    paddle_height = 20
 
-class Paddle(pygame.sprite.Sprite):
+    all_sprites_list = pygame.sprite.Group()
 
-    def __init__(self, color, width, height):
-        super().__init__()
-        self.image = pygame.Surface([width, height])
-        pygame.draw.rect(self.image, color, [0, 0, width, height])
-        self.rect = self.image.get_rect()
+    brick_sound = pygame.mixer.Sound('sounds_brick.wav')
+    paddle_sound = pygame.mixer.Sound('sounds_paddle.wav')
+    wall_sound = pygame.mixer.Sound('sounds_wall.wav')
 
-    def move_right(self, pixels):
-        self.rect.x += pixels
-        if self.rect.x > WIDTH - wall_width - paddle_width:
-            self.rect.x = WIDTH - wall_width - paddle_width
+    class Brick(pygame.sprite.Sprite):
 
-    def move_left(self, pixels):
-        self.rect.x -= pixels
-        if self.rect.x < wall_width:
-            self.rect.x = wall_width
+        def __init__(self, color, width, height):
+            super().__init__()
+            self.image = pygame.Surface([width, height])
+            pygame.draw.rect(self.image, color, [0, 0, width, height])
+            self.rect = self.image.get_rect()
 
+    class Paddle(pygame.sprite.Sprite):
 
-class Ball(pygame.sprite.Sprite):
+        def __init__(self, color, width, height):
+            super().__init__()
+            self.image = pygame.Surface([width, height])
+            pygame.draw.rect(self.image, color, [0, 0, width, height])
+            self.rect = self.image.get_rect()
 
-    def __init__(self, color, width, height):
-        super().__init__()
-        self.image = pygame.Surface([width, height])
-        pygame.draw.rect(self.image, color, [0, 0, width, height])
-        self.rect = self.image.get_rect()
-        self.velocity = [velocity, velocity]
+        def move_right(self, pixels):
+            self.rect.x += pixels
+            if self.rect.x > WIDTH - wall_width - paddle_width:
+                self.rect.x = WIDTH - wall_width - paddle_width
 
-    def update(self):
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
+        def move_left(self, pixels):
+            self.rect.x -= pixels
+            if self.rect.x < wall_width:
+                self.rect.x = wall_width
 
-    def bounce(self):
-        self.velocity[0] = self.velocity[0]
-        self.velocity[1] = -self.velocity[1]
+    class Ball(pygame.sprite.Sprite):
 
+        def __init__(self, color, width, height):
+            super().__init__()
+            self.image = pygame.Surface([width, height])
+            pygame.draw.rect(self.image, color, [0, 0, width, height])
+            self.rect = self.image.get_rect()
+            self.velocity = [velocity, velocity]
 
-ball = Ball(WHITE, 10, 10)
-ball.rect.x = WIDTH // 2 - 5
-ball.rect.y = HEIGHT // 2 - 5
+        def update(self):
+            self.rect.x += self.velocity[0]
+            self.rect.y += self.velocity[1]
 
-paddle = Paddle(BLUE, paddle_width, paddle_height)
-paddle.rect.x = WIDTH // 2 - paddle_width // 2
-paddle.rect.y = HEIGHT - 65
+        def bounce(self):
+            self.velocity[0] = self.velocity[0]
+            self.velocity[1] = -self.velocity[1]
 
-all_bricks = pygame.sprite.Group()
+    ball = Ball(WHITE, 10, 10)
+    ball.rect.x = WIDTH // 2 - 5
+    ball.rect.y = HEIGHT // 2 - 5
 
-brick_width = 55
-brick_height = 16
-x_gap = 7
-y_gap = 5
-wall_width = 16
+    paddle = Paddle(BLUE, paddle_width, paddle_height)
+    paddle.rect.x = WIDTH // 2 - paddle_width // 2
+    paddle.rect.y = HEIGHT - 65
 
+    all_bricks = pygame.sprite.Group()
 
-def bricks():
-    for j in range(8):
-        for i in range(14):
-            if j < 2:
-                if i == 0:
-                    brick = Brick(RED, brick_width, brick_height)
-                    brick.rect.x = wall_width
-                    brick.rect.y = 215 + (j * (y_gap + brick_height))
-                    all_sprites_list.add(brick)
-                    all_bricks.add(brick)
-                else:
-                    brick = Brick(RED, brick_width, brick_height)
-                    brick.rect.x = wall_width + brick_width + x_gap + (i - 1) * (brick_width + x_gap)
-                    brick.rect.y = (215 + 0) + j * (y_gap + brick_height)
-                    all_sprites_list.add(brick)
-                    all_bricks.add(brick)
-            if 1 < j < 4:
-                if i == 0:
-                    brick = Brick(ORANGE, brick_width, brick_height)
-                    brick.rect.x = wall_width
-                    brick.rect.y = (215 + (j * (y_gap + brick_height)))
-                    all_sprites_list.add(brick)
-                    all_bricks.add(brick)
-                else:
-                    brick = Brick(ORANGE, brick_width, brick_height)
-                    brick.rect.x = wall_width + brick_width + x_gap + (i - 1) * (brick_width + x_gap)
-                    brick.rect.y = (215 + j * (y_gap + brick_height))
-                    all_sprites_list.add(brick)
-                    all_bricks.add(brick)
-            if 3 < j < 6:
-                if i == 0:
-                    brick = Brick(YELLOW, brick_width, brick_height)
-                    brick.rect.x = wall_width
-                    brick.rect.y = 215 + (j * (y_gap + brick_height))
-                    all_sprites_list.add(brick)
-                    all_bricks.add(brick)
-                else:
-                    brick = Brick(YELLOW, brick_width, brick_height)
-                    brick.rect.x = wall_width + brick_width + x_gap + (i - 1) * (brick_width + x_gap)
-                    brick.rect.y = 215 + (j * (y_gap + brick_height))
-                    all_sprites_list.add(brick)
-                    all_bricks.add(brick)
+    brick_width = 55
+    brick_height = 16
+    x_gap = 7
+    y_gap = 5
+    wall_width = 16
 
-            if 5 < j < 8:
-                if i == 0:
-                    brick = Brick(GREEN, brick_width, brick_height)
-                    brick.rect.x = wall_width
-                    brick.rect.y = 215 + j * (y_gap + brick_height)
-                    all_sprites_list.add(brick)
-                    all_bricks.add(brick)
-                else:
-                    brick = Brick(GREEN, brick_width, brick_height)
-                    brick.rect.x = wall_width + brick_width + x_gap + (i - 1) * (brick_width + x_gap)
-                    brick.rect.y = 215 + j * (y_gap + brick_height)
-                    all_sprites_list.add(brick)
-                    all_bricks.add(brick)
+    def bricks():
+        for j in range(8):
+            for i in range(14):
+                if j < 2:
+                    if i == 0:
+                        brick = Brick(RED, brick_width, brick_height)
+                        brick.rect.x = wall_width
+                        brick.rect.y = 215 + (j * (y_gap + brick_height))
+                        all_sprites_list.add(brick)
+                        all_bricks.add(brick)
+                    else:
+                        brick = Brick(RED, brick_width, brick_height)
+                        brick.rect.x = wall_width + brick_width + x_gap + (i - 1) * (brick_width + x_gap)
+                        brick.rect.y = (215 + 0) + j * (y_gap + brick_height)
+                        all_sprites_list.add(brick)
+                        all_bricks.add(brick)
+                if 1 < j < 4:
+                    if i == 0:
+                        brick = Brick(ORANGE, brick_width, brick_height)
+                        brick.rect.x = wall_width
+                        brick.rect.y = (215 + (j * (y_gap + brick_height)))
+                        all_sprites_list.add(brick)
+                        all_bricks.add(brick)
+                    else:
+                        brick = Brick(ORANGE, brick_width, brick_height)
+                        brick.rect.x = wall_width + brick_width + x_gap + (i - 1) * (brick_width + x_gap)
+                        brick.rect.y = (215 + j * (y_gap + brick_height))
+                        all_sprites_list.add(brick)
+                        all_bricks.add(brick)
+                if 3 < j < 6:
+                    if i == 0:
+                        brick = Brick(YELLOW, brick_width, brick_height)
+                        brick.rect.x = wall_width
+                        brick.rect.y = 215 + (j * (y_gap + brick_height))
+                        all_sprites_list.add(brick)
+                        all_bricks.add(brick)
+                    else:
+                        brick = Brick(YELLOW, brick_width, brick_height)
+                        brick.rect.x = wall_width + brick_width + x_gap + (i - 1) * (brick_width + x_gap)
+                        brick.rect.y = 215 + (j * (y_gap + brick_height))
+                        all_sprites_list.add(brick)
+                        all_bricks.add(brick)
 
+                if 5 < j < 8:
+                    if i == 0:
+                        brick = Brick(GREEN, brick_width, brick_height)
+                        brick.rect.x = wall_width
+                        brick.rect.y = 215 + j * (y_gap + brick_height)
+                        all_sprites_list.add(brick)
+                        all_bricks.add(brick)
+                    else:
+                        brick = Brick(GREEN, brick_width, brick_height)
+                        brick.rect.x = wall_width + brick_width + x_gap + (i - 1) * (brick_width + x_gap)
+                        brick.rect.y = 215 + j * (y_gap + brick_height)
+                        all_sprites_list.add(brick)
+                        all_bricks.add(brick)
 
-bricks()
+    bricks()
 
-all_sprites_list.add(paddle)
-all_sprites_list.add(ball)
+    all_sprites_list.add(paddle)
+    all_sprites_list.add(ball)
 
+    def main(score, balls, game_level):
+        run = True
+        flag = 1
 
-def main(score, balls):
-    run = True
-    flag = 1
+        while run:
 
-    while run:
+            def paused():
 
-        def paused():
+                pause = True
+                p_font = pygame.font.Font('PressStart2P.ttf', 70)
+                p_text = p_font.render('PAUSED', True, COLOR_WHITE, COLOR_BLACK)
+                p_text_rect = aux_text.get_rect()
+                p_text_rect.center = (365, 450)
+                screen.blit(p_text, p_text_rect)
+                pygame.display.flip()
 
-            pause = True
-            p_font = pygame.font.Font('PressStart2P.ttf', 70)
-            p_text = p_font.render('PAUSED', True, COLOR_WHITE, COLOR_BLACK)
-            p_text_rect = aux_text.get_rect()
-            p_text_rect.center = (HEIGHT // 2, WIDTH // 2)
-            screen.blit(p_text, p_text_rect)
-            pygame.display.flip()
-
-            while pause:
-                for p in pygame.event.get():
-                    if p.type == pygame.QUIT:
-                        pygame.quit()
-
-                    if p.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_p:
-                            main(score, balls)
-
-                        if p.key == pygame.K_ESCAPE:
+                while pause:
+                    for p in pygame.event.get():
+                        if p.type == pygame.QUIT:
                             pygame.quit()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            if event.key == pygame.K_p:
-                paused()
+                        if p.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_p:
+                                main(score, balls, game_level)
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            flag = -1 * (ang[random.randint(0, 4)])
-            paddle.move_left(10)
-        if keys[pygame.K_RIGHT]:
-            flag = 1 * (ang[random.randint(0, 4)])
-            paddle.move_right(10)
+                            if p.key == pygame.K_ESCAPE:
+                                pygame.quit()
 
-        all_sprites_list.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                if event.key == pygame.K_p:
+                    paused()
+                if event.key == pygame.K_r:
+                    main_game(0, 1, game_level)
 
-        if ball.rect.y < 70:
-            ball.velocity[1] = -ball.velocity[1]
-            wall_sound.play()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                flag = -1 * (ang[random.randint(0, 4)])
+                paddle.move_left(10)
+            if keys[pygame.K_RIGHT]:
+                flag = 1 * (ang[random.randint(0, 4)])
+                paddle.move_right(10)
 
-        if ball.rect.x >= WIDTH - wall_width - 10:
-            ball.velocity[0] = -ball.velocity[0]
-            wall_sound.play()
+            all_sprites_list.update()
 
-        if ball.rect.x <= wall_width + 10:
-            ball.velocity[0] = -ball.velocity[0]
-            wall_sound.play()
+            if ball.rect.y < 70:
+                ball.velocity[1] = -ball.velocity[1]
+                wall_sound.play()
 
-        if ball.rect.y > HEIGHT:
-            ball.rect.x = WIDTH // 2 - 5
-            ball.rect.y = HEIGHT // 2 - 5
-            ball.velocity[1] = ball.velocity[1]
-            balls += 1
-            if balls == 4:
-                font = pygame.font.Font('PressStart2P.ttf', 70)
-                text = font.render("GAME OVER", True, WHITE)
-                text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
-                screen.blit(text, text_rect)
-                pygame.display.update()
-                pygame.time.wait(2000)
-                run = False
+            if ball.rect.x >= WIDTH - wall_width:
+                ball.velocity[0] = -ball.velocity[0]
+                wall_sound.play()
 
-        if pygame.sprite.collide_mask(ball, paddle):
-            ball.velocity[0] = flag
-            ball.rect.x += ball.velocity[0]
-            ball.rect.y -= ball.velocity[1]
-            ball.bounce()
-            paddle_sound.play()
+            if ball.rect.x <= wall_width:
+                ball.velocity[0] = -ball.velocity[0]
+                wall_sound.play()
 
-        brick_collision_list = pygame.sprite.spritecollide(ball, all_bricks, False)
-        for brick in brick_collision_list:
-            ball.bounce()
-            brick_sound.play()
+            if ball.rect.y > HEIGHT:
+                ball.rect.x = WIDTH // 2 - 5
+                ball.rect.y = HEIGHT // 2 - 5
+                ball.velocity[1] = ball.velocity[1]
+                balls += 1
+                if balls == 4:
+                    font = pygame.font.Font('PressStart2P.ttf', 70)
+                    text = font.render("GAME OVER", True, WHITE)
+                    text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+                    reset_font = pygame.font.Font('PressStart2P.ttf', 16)
+                    reset_text = reset_font.render('Press r to restart the game or ESC to exit',
+                                                   True, COLOR_WHITE, COLOR_BLACK)
+                    reset_text_rect = reset_text.get_rect()
+                    reset_text_rect.center = (450, 650)
+                    screen.blit(reset_text, reset_text_rect)
+                    screen.blit(text, text_rect)
+                    pygame.display.update()
+                    # pygame.time.wait(2000)
+                    # run = False
+                    over = True
+                    while over:
+                        for g in pygame.event.get():
+                            if g.type == pygame.QUIT:
+                                run = False
+                            if g.key == pygame.K_ESCAPE:
+                                pygame.quit()
+                            if g.key == pygame.K_r:
+                                main_game(0, 1, game_level)
 
-            if 380.5 > brick.rect.y > 338.5:
-                score += 1
-                brick.kill()
+            if pygame.sprite.collide_mask(ball, paddle):
+                ball.velocity[0] = flag
+                ball.rect.x += ball.velocity[0]
+                ball.rect.y -= ball.velocity[1]
+                ball.bounce()
+                paddle_sound.play()
 
-            elif 338.5 > brick.rect.y > 294:
-                score += 3
-                brick.kill()
+            brick_collision_list = pygame.sprite.spritecollide(ball, all_bricks, False)
+            for brick in brick_collision_list:
+                ball.bounce()
+                brick_sound.play()
 
-            elif 294 > brick.rect.y > 254.5:
-                score += 5
-                brick.kill()
+                if 380.5 > brick.rect.y > 338.5:
+                    score += 1
+                    brick.kill()
 
-            else:
-                score += 7
-                brick.kill()
+                elif 338.5 > brick.rect.y > 294:
+                    score += 3
+                    brick.kill()
 
-            if len(all_bricks) == 0:
-                font = pygame.font.Font('PressStart2P.ttf', 70)
-                text = font.render("FINISH!", True, WHITE)
-                text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
-                all_sprites_list.add(ball)
-                screen.blit(text, text_rect)
-                pygame.display.update()
-                pygame.time.wait(2000)
-                run = False
+                elif 294 > brick.rect.y > 254.5:
+                    score += 5
+                    brick.kill()
 
-        screen.fill(BLACK)
+                else:
+                    score += 7
+                    brick.kill()
 
-        pygame.draw.line(screen, GREY, [0, 19], [WIDTH, 19], 40)
-        pygame.draw.line(screen, GREY, [(wall_width / 2) - 1, 0], [(wall_width / 2) - 1, HEIGHT], wall_width)
-        pygame.draw.line(screen, GREY, [(WIDTH - wall_width / 2) - 1, 0], [(WIDTH - wall_width / 2) - 1, HEIGHT],
-                         wall_width)
+                if len(all_bricks) == 0:
+                    font = pygame.font.Font('PressStart2P.ttf', 70)
+                    text = font.render("FINISH!", True, WHITE)
+                    text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+                    finish_font = pygame.font.Font('PressStart2P.ttf', 16)
+                    finish_text = finish_font.render('Press c to continue or ESC to exit',
+                                                     True, COLOR_WHITE, COLOR_BLACK)
+                    finish_text_rect = finish_text.get_rect()
+                    finish_text_rect.center = (450, 650)
+                    all_sprites_list.add(ball)
+                    screen.blit(text, text_rect)
+                    screen.blit(finish_text, finish_text_rect)
+                    pygame.display.update()
+                    # pygame.time.wait(2000)
+                    # run = False
+                    finish = True
+                    while finish:
+                        for f in pygame.event.get():
+                            if f.type == pygame.QUIT:
+                                run = False
+                            if f.key == pygame.K_c:
+                                game_level += 1
+                                main_game(score, 1, game_level)
 
-        pygame.draw.line(screen, BLUE, [(wall_width / 2) - 1, HEIGHT - 65 + paddle_height / 2 - 54 / 2],
-                         [(wall_width / 2) - 1, HEIGHT - 65 + paddle_height / 2 - 54 / 2 + 54], wall_width)
-        pygame.draw.line(screen, BLUE, [(WIDTH - wall_width / 2) - 1, HEIGHT - 65 + paddle_height / 2 - 54 / 2],
-                         [(WIDTH - wall_width / 2) - 1, HEIGHT - 65 + paddle_height / 2 - 54 / 2 + 54], wall_width)
+            screen.fill(BLACK)
 
-        pygame.draw.line(screen, RED, [(wall_width / 2) - 1, 212.5],
-                         [(wall_width / 2) - 1, 212.5 + 2 * brick_height + 2 * y_gap], wall_width)
-        pygame.draw.line(screen, RED, [(WIDTH - wall_width / 2) - 1, 212.5],
-                         [(WIDTH - wall_width / 2) - 1, 212.5 + 2 * brick_height + 2 * y_gap], wall_width)
+            pygame.draw.line(screen, GREY, [0, 19], [WIDTH, 19], 40)
+            pygame.draw.line(screen, GREY, [(wall_width / 2) - 1, 0], [(wall_width / 2) - 1, HEIGHT], wall_width)
+            pygame.draw.line(screen, GREY, [(WIDTH - wall_width / 2) - 1, 0], [(WIDTH - wall_width / 2) - 1, HEIGHT],
+                             wall_width)
 
-        pygame.draw.line(screen, ORANGE, [(wall_width / 2) - 1, 212.5 + 2 * brick_height + 2 * y_gap],
-                         [(wall_width / 2) - 1, 212.5 + 4 * brick_height + 4 * y_gap], wall_width)
-        pygame.draw.line(screen, ORANGE, [(WIDTH - wall_width / 2) - 1, 212.5 + 2 * brick_height + 2 * y_gap],
-                         [(WIDTH - wall_width / 2) - 1, 212.5 + 4 * brick_height + 4 * y_gap], wall_width)
+            pygame.draw.line(screen, BLUE, [(wall_width / 2) - 1, HEIGHT - 65 + paddle_height / 2 - 54 / 2],
+                             [(wall_width / 2) - 1, HEIGHT - 65 + paddle_height / 2 - 54 / 2 + 54], wall_width)
+            pygame.draw.line(screen, BLUE, [(WIDTH - wall_width / 2) - 1, HEIGHT - 65 + paddle_height / 2 - 54 / 2],
+                             [(WIDTH - wall_width / 2) - 1, HEIGHT - 65 + paddle_height / 2 - 54 / 2 + 54], wall_width)
 
-        pygame.draw.line(screen, YELLOW, [(wall_width / 2) - 1, 212.5 + 4 * brick_height + 4 * y_gap],
-                         [(wall_width / 2) - 1, 212.5 + 6 * brick_height + 6 * y_gap], wall_width)
-        pygame.draw.line(screen, YELLOW, [(WIDTH - wall_width / 2) - 1, 212.5 + 4 * brick_height + 4 * y_gap],
-                         [(WIDTH - wall_width / 2) - 1, 212.5 + 6 * brick_height + 6 * y_gap], wall_width)
+            pygame.draw.line(screen, RED, [(wall_width / 2) - 1, 212.5],
+                             [(wall_width / 2) - 1, 212.5 + 2 * brick_height + 2 * y_gap], wall_width)
+            pygame.draw.line(screen, RED, [(WIDTH - wall_width / 2) - 1, 212.5],
+                             [(WIDTH - wall_width / 2) - 1, 212.5 + 2 * brick_height + 2 * y_gap], wall_width)
 
-        pygame.draw.line(screen, GREEN, [(wall_width / 2) - 1, 212.5 + 6 * brick_height + 6 * y_gap],
-                         [(wall_width / 2) - 1, 212.5 + 8 * brick_height + 8 * y_gap], wall_width)
-        pygame.draw.line(screen, GREEN, [(WIDTH - wall_width / 2) - 1, 212.5 + 6 * brick_height + 6 * y_gap],
-                         [(WIDTH - wall_width / 2) - 1, 212.5 + 8 * brick_height + 8 * y_gap], wall_width)
+            pygame.draw.line(screen, ORANGE, [(wall_width / 2) - 1, 212.5 + 2 * brick_height + 2 * y_gap],
+                             [(wall_width / 2) - 1, 212.5 + 4 * brick_height + 4 * y_gap], wall_width)
+            pygame.draw.line(screen, ORANGE, [(WIDTH - wall_width / 2) - 1, 212.5 + 2 * brick_height + 2 * y_gap],
+                             [(WIDTH - wall_width / 2) - 1, 212.5 + 4 * brick_height + 4 * y_gap], wall_width)
 
-        font = pygame.font.Font('PressStart2P.ttf', 70)
-        text = font.render(str(f"{score:03}"), True, WHITE)
-        screen.blit(text, (80, 120))
-        text = font.render(str(balls), True, WHITE)
-        screen.blit(text, (520, 41))
-        text = font.render('000', True, WHITE)
-        screen.blit(text, (580, 120))
-        text = font.render('1', True, WHITE)
-        screen.blit(text, (20, 40))
+            pygame.draw.line(screen, YELLOW, [(wall_width / 2) - 1, 212.5 + 4 * brick_height + 4 * y_gap],
+                             [(wall_width / 2) - 1, 212.5 + 6 * brick_height + 6 * y_gap], wall_width)
+            pygame.draw.line(screen, YELLOW, [(WIDTH - wall_width / 2) - 1, 212.5 + 4 * brick_height + 4 * y_gap],
+                             [(WIDTH - wall_width / 2) - 1, 212.5 + 6 * brick_height + 6 * y_gap], wall_width)
 
-        all_sprites_list.draw(screen)
+            pygame.draw.line(screen, GREEN, [(wall_width / 2) - 1, 212.5 + 6 * brick_height + 6 * y_gap],
+                             [(wall_width / 2) - 1, 212.5 + 8 * brick_height + 8 * y_gap], wall_width)
+            pygame.draw.line(screen, GREEN, [(WIDTH - wall_width / 2) - 1, 212.5 + 6 * brick_height + 6 * y_gap],
+                             [(WIDTH - wall_width / 2) - 1, 212.5 + 8 * brick_height + 8 * y_gap], wall_width)
 
-        pygame.display.update()
+            font = pygame.font.Font('PressStart2P.ttf', 70)
+            text = font.render(str(f"{score:03}"), True, WHITE)
+            screen.blit(text, (80, 120))
+            text = font.render(str(balls), True, WHITE)
+            screen.blit(text, (520, 41))
+            text = font.render('000', True, WHITE)
+            screen.blit(text, (580, 120))
+            text = font.render('{}'.format(game_level), True, WHITE)
+            screen.blit(text, (20, 40))
 
-        clock.tick(FPS)
+            all_sprites_list.draw(screen)
 
-    pygame.quit()
+            pygame.display.update()
+
+            clock.tick(FPS)
+
+        pygame.quit()
+
+    main(score_game, balls_game, level_game)
 
 
 while True:
@@ -330,7 +364,7 @@ while True:
     for click in pygame.event.get():
         if click.type == pygame.KEYDOWN:
             if click.key == pygame.K_SPACE:
-                main(game_score, game_balls)
+                main_game(game_score, game_balls, level)
             if click.key == pygame.K_ESCAPE:
                 pygame.quit()
         elif click.type == pygame.QUIT:
