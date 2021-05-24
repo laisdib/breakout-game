@@ -1,4 +1,5 @@
 import pygame
+import random
 
 pygame.init()
 
@@ -23,6 +24,8 @@ YELLOW = (197, 199, 37)
 score = 0
 balls = 1
 velocity = 5
+r = [-1, 1]
+ang = [3, 5, 7, 9, 10]
 
 paddle_width = 1000
 paddle_height = 20
@@ -178,15 +181,15 @@ def main(score, balls):
 
         all_sprites_list.update()
 
-        if ball.rect.y < 40:
+        if ball.rect.y < 50:
             ball.velocity[1] = -ball.velocity[1]
             wall_sound.play()
 
-        if ball.rect.x >= WIDTH - wall_width - 10:
+        if ball.rect.x >= WIDTH - wall_width + 10:
             ball.velocity[0] = -ball.velocity[0]
             wall_sound.play()
 
-        if ball.rect.x <= wall_width:
+        if ball.rect.x <= wall_width - 10:
             ball.velocity[0] = -ball.velocity[0]
             wall_sound.play()
 
@@ -197,7 +200,7 @@ def main(score, balls):
             balls += 1
             if balls == 4:
                 font = pygame.font.Font('PressStart2P.ttf', 70)
-                text = font.render("GAME OVER", 1, WHITE)
+                text = font.render("GAME OVER", True, WHITE)
                 text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
                 screen.blit(text, text_rect)
                 pygame.display.update()
@@ -212,8 +215,10 @@ def main(score, balls):
 
         brick_collision_list = pygame.sprite.spritecollide(ball, all_bricks, False)
         for brick in brick_collision_list:
+            print(ball.velocity[0])
             ball.bounce()
             brick_sound.play()
+
             if len(brick_collision_list) > 0:
                 step += 1
                 for i in range(0, 448, 28):
@@ -222,19 +227,35 @@ def main(score, balls):
                         ball.velocity[1] += 1
             if 380.5 > brick.rect.y > 338.5:
                 score += 1
+                if abs(ball.velocity[0]) < 7:
+                    ball.velocity[0] = 7
+                ball.velocity[0] *= r[random.randint(-1, 1)]
                 brick.kill()
+
             elif 338.5 > brick.rect.y > 294:
                 score += 3
+                if abs(ball.velocity[0]) < 8:
+                    ball.velocity[0] = 8
+                ball.velocity[0] *= r[random.randint(-1, 1)]
                 brick.kill()
+
             elif 294 > brick.rect.y > 254.5:
                 score += 5
+                if abs(ball.velocity[0]) < 9:
+                    ball.velocity[0] = 9
+                ball.velocity[0] *= r[random.randint(-1, 1)]
                 brick.kill()
+
             else:
                 score += 7
+                if abs(ball.velocity[0]) < 10:
+                    ball.velocity[0] = 10
+                ball.velocity[0] *= r[random.randint(-1, 1)]
                 brick.kill()
+
             if len(all_bricks) == 0:
                 font = pygame.font.Font('PressStart2P.ttf', 70)
-                text = font.render("FINISH!", 1, WHITE)
+                text = font.render("FINISH!", True, WHITE)
                 text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
                 all_sprites_list.add(ball)
                 screen.blit(text, text_rect)
@@ -275,13 +296,13 @@ def main(score, balls):
                          [(WIDTH - wall_width / 2) - 1, 212.5 + 8 * brick_height + 8 * y_gap], wall_width)
 
         font = pygame.font.Font('PressStart2P.ttf', 70)
-        text = font.render(str(f"{score:03}"), 1, WHITE)
+        text = font.render(str(f"{score:03}"), True, WHITE)
         screen.blit(text, (80, 120))
-        text = font.render(str(balls), 1, WHITE)
+        text = font.render(str(balls), True, WHITE)
         screen.blit(text, (520, 41))
-        text = font.render('000', 1, WHITE)
+        text = font.render('000', True, WHITE)
         screen.blit(text, (580, 120))
-        text = font.render('1', 1, WHITE)
+        text = font.render('1', True, WHITE)
         screen.blit(text, (20, 40))
 
         all_sprites_list.draw(screen)
